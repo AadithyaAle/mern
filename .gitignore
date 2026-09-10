@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Production/build output
+dist/
+build/
+coverage/
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+backend/.env
+
+# Logs and runtime files
+*.log
+logs/
+*.pid
+*.pid.lock
+
+# Local databases and uploads
+data/
+uploads/
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Postman local workspace metadata
+.postman/
+postman

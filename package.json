@@ -1,0 +1,26 @@
+{
+  "name": "mern",
+  "version": "1.0.0",
+  "description": "ShopKart customer authentication lab",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "dev:frontend": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "test": "echo \"No automated tests yet\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.9.5",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "vite": "^7.1.7"
+  }
+}
