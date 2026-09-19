@@ -21,7 +21,7 @@ function Login(){
         setLoading(true)
         try {
             await loginCustomer(form)
-            navigate("/home")
+          navigate("/home")
         }catch (requesError){setError("Invalid Credentials")}
         finally{setLoading(false)}
     }

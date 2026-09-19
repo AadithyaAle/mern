@@ -1,30 +1,22 @@
-const CUSTOMER_API='/customers'
+import axios from "axios"
+
+const api=axios.create({baseURL:"/",withCredentials:true})
 
 async function request(path,options={}){
-    const response = await fetch(`${CUSTOMER_API}${path}`, {
-    ...options,
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-  })
-  const data=await response.json();
-  if (!response.ok){
-    throw new Error(data.message||'Request faild')
+  try{
+    const response=await api({url:path,...options})
+    return response.data
+  }catch(error){
+    throw new Error(error.response?.data?.message||"Request failed")
   }
-  return data
 }
 export function registerCustomer(customerData){
-    return request('/register',{
-        method:'POST',body:JSON.stringify(customerData),
-    })
+    return request('/customers/register',{method:'POST',data:customerData})
 }
 export function loginCustomer(credentials){
-  return request("/login",{
-    method: "POST",
-    body: JSON.stringify(credentials),
-  })
+  return request("/customers/login",{method:"POST",data:credentials})
 }
-export function getMyProfile(){return request("/me")}
-export function logoutCustomer(){return request("/logout",{method:"POST"})}
+export function getMyProfile(){return request("/customers/me")}
+export function logoutCustomer(){return request("/customers/logout",{method:"POST"})}
+export function getProducts(params={}){return request("/products",{params})}
+export function getProduct(id){return request(`/products/${id}`)}
