@@ -7,11 +7,13 @@ const app=express()
 const PORT=process.env.PORT||5000;
 const customerRoutes=require("./routes/customer.routes")
 const productRoutes=require("./routes/product.routes")
+const wishlistRoutes=require("./routes/wishlist.routes")
 
 app.use(express.json())
 app.use(cookieParser())
 app.use("/customers",customerRoutes)
 app.use("/products",productRoutes)
+app.use("/wishlist",wishlistRoutes)
 
 app.get("/",(req,res)=>{
     res.json({

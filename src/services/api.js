@@ -20,3 +20,6 @@ export function getMyProfile(){return request("/customers/me")}
 export function logoutCustomer(){return request("/customers/logout",{method:"POST"})}
 export function getProducts(params={}){return request("/products",{params})}
 export function getProduct(id){return request(`/products/${id}`)}
+export function addToWishlist(productId){return request(`/wishlist/${productId}`,{method:"POST"})}
+export function getWishlist(){return request ("/wishlist")}
+export function removeFromWishlist(productId){return request(`/wishlist/${productId}`,{method:"DELETE"})}

@@ -1,6 +1,7 @@
 import React,{useEffect,useState} from "react"
 import {Link} from "react-router-dom"
-import {getProducts} from "../services/api"
+import {addToWishlist,getProducts} from "../services/api"
+import Navbar from "../components/Navbar";
 
 const categories=["All Categories","Electronics","Fashion","Books","Home"]
 
@@ -10,6 +11,23 @@ function Products(){
     const [category,setCategory]=useState("All Categories")
     const [loading,setLoading]=useState(true)
     const [error,setError]=useState("")
+    const [savingId, setSavingId] = useState("");
+    const [savedIds, setSavedIds] = useState([]);
+    const [wishlistError, setWishlistError] = useState("");
+
+    async function handleAddToWishlist(productId) {
+        setSavingId(productId);
+        setWishlistError("");
+
+        try {
+            await addToWishlist(productId);
+            setSavedIds((currentIds) => [...currentIds, productId]);
+        } catch (requestError) {
+            setWishlistError(requestError.message || "Unable to save product.");
+        } finally {
+            setSavingId("");
+        }
+    }
 
     useEffect(()=>{
         const timer=setTimeout(async()=>{
@@ -29,6 +47,7 @@ function Products(){
     },[search,category])
 
     return <main className="catalog-page">
+        <Navbar />
         <header className="catalog-header">
             <div>
                 <p className="eyebrow">SHOPKART / DISCOVER</p>
@@ -44,6 +63,7 @@ function Products(){
                 {categories.map(item=><option key={item}>{item}</option>)}
             </select>
         </section>
+        {wishlistError && <p className="catalog-message error">{wishlistError}</p>}
         {loading&&<p className="catalog-message">Loading products...</p>}
         {!loading&&error&&<p className="catalog-message error">{error}</p>}
         {!loading&&!error&&!products.length&&<p className="catalog-message">No products found.</p>}
@@ -56,6 +76,15 @@ function Products(){
                     <p className="product-price">₹{product.price.toLocaleString("en-IN")}</p>
                     <p className={product.stock>0?"stock":"stock out-of-stock"}>{product.stock>0?`${product.stock} units left`:"Out of stock"}</p>
                     <Link className="button" to={`/products/${product._id}`}>View details <span aria-hidden="true">→</span></Link>
+                    <button
+                        className="button wishlist-button"
+                        type="button"
+                        disabled={savingId===product._id || savedIds.includes(product._id)}
+                        onClick={()=>handleAddToWishlist(product._id)}
+                    >
+                        {savingId===product._id ? "Saving..." : savedIds.includes(product._id) ? "Added to wishlist" : "Add to wishlist"}
+                        <span aria-hidden="true">{savedIds.includes(product._id) ? "♥" : "♡"}</span>
+                    </button>
                 </div>
             </article>)}
         </section>}

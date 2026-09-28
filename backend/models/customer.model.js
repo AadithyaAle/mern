@@ -12,6 +12,12 @@ const customerSchema=new mongoose.Schema({
     phone:{
         type:String,required:true,trim:true,
     },
+    wishlist:[
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Product",
+        }
+    ],
 },
 {timestamps:{
     createdAt:true,updatedAt:false,

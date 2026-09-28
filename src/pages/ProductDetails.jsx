@@ -1,12 +1,15 @@
 import React,{useEffect,useState} from "react"
 import {Link,useParams} from "react-router-dom"
-import {getProduct} from "../services/api"
+import {addToWishlist,getProduct} from "../services/api"
+import Navbar from "../components/Navbar";
 
 function ProductDetails(){
     const {id}=useParams()
     const [product,setProduct]=useState(null)
     const [loading,setLoading]=useState(true)
     const [error,setError]=useState("")
+    const [saving,setSaving]=useState(false)
+    const [saved,setSaved]=useState(false)
 
     useEffect(()=>{
         async function loadProduct(){
@@ -20,10 +23,25 @@ function ProductDetails(){
         loadProduct()
     },[id])
 
+    async function handleAddToWishlist(){
+        setSaving(true)
+        setError("")
+
+        try {
+            await addToWishlist(id)
+            setSaved(true)
+        } catch (requestError) {
+            setError(requestError.message || "Unable to save product.")
+        } finally {
+            setSaving(false)
+        }
+    }
+
     if(loading)return <main className="catalog-page"><p className="catalog-message">Loading product...</p></main>
     if(error)return <main className="catalog-page"><p className="catalog-message error">{error}</p><Link className="text-link" to="/products">Back to products</Link></main>
 
     return <main className="catalog-page">
+        <Navbar />
         <Link className="text-link" to="/products">← Back to products</Link>
         <section className="product-detail">
             <img src={product.image} alt={product.name} />
@@ -33,7 +51,11 @@ function ProductDetails(){
                 <p className="product-description">{product.description}</p>
                 <p className="product-price">₹{product.price.toLocaleString("en-IN")}</p>
                 <p className={product.stock>0?"stock":"stock out-of-stock"}>{product.stock>0?`${product.stock} units left`:"Out of stock"}</p>
-                <button className="button" type="button" disabled={!product.stock}>Add to cart <span aria-hidden="true">+</span></button>
+                {error && <p className="catalog-message error">{error}</p>}
+                <button className="button" type="button" disabled={!product.stock || saving || saved} onClick={handleAddToWishlist}>
+                    {saving ? "Saving..." : saved ? "Added to wishlist" : "Add to wishlist"}
+                    <span aria-hidden="true">{saved ? "♥" : "♡"}</span>
+                </button>
             </div>
         </section>
     </main>
