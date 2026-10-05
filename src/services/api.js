@@ -23,3 +23,16 @@ export function getProduct(id){return request(`/products/${id}`)}
 export function addToWishlist(productId){return request(`/wishlist/${productId}`,{method:"POST"})}
 export function getWishlist(){return request ("/wishlist")}
 export function removeFromWishlist(productId){return request(`/wishlist/${productId}`,{method:"DELETE"})}
+export function getCart(){return request("/cart")}
+export function addToCart(productId){
+  return request(`/cart/${productId}`,{method:"POST"})
+}
+export function updateCartQuantity(productId,quantity){
+  return request(`/cart/${productId}`,{
+    method:"PATCH",
+    data:{quantity},
+  })
+}
+export function removeFromCart(productId){
+  return request(`/cart/${productId}`,{method:"DELETE"})
+}

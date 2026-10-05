@@ -1,31 +1,56 @@
 import React,{useEffect,useState} from "react"
 import {Link} from "react-router-dom"
-import {addToWishlist,getProducts} from "../services/api"
+import { useDispatch } from "react-redux"
+import {addToWishlist,getProducts,addToCart,getCart} from "../services/api"
+import {setCartItems,setCartLoading,setCartError} from "../store/cartSlice"
 import Navbar from "../components/Navbar";
 
 const categories=["All Categories","Electronics","Fashion","Books","Home"]
 
 function Products(){
+    const dispatch=useDispatch()
     const [products,setProducts]=useState([])
     const [search,setSearch]=useState("")
     const [category,setCategory]=useState("All Categories")
     const [loading,setLoading]=useState(true)
     const [error,setError]=useState("")
-    const [savingId, setSavingId] = useState("");
-    const [savedIds, setSavedIds] = useState([]);
-    const [wishlistError, setWishlistError] = useState("");
+    const [savingId, setSavingId] = useState("")
+    const [savedIds, setSavedIds] = useState([])
+    const [wishlistError, setWishlistError] = useState("")
+
+    async function refreshCart(){
+        dispatch(setCartLoading(true))
+        try {
+            const data=await getCart()
+            dispatch(setCartItems(data.cart || []))
+            dispatch(setCartError(null))
+        } catch (requestError) {
+            dispatch(setCartError(requestError.message || "Unable to load cart"))
+        } finally {
+            dispatch(setCartLoading(false))
+        }
+    }
+
+    async function handleAddToCart(productId){
+        try {
+            await addToCart(productId)
+            await refreshCart()
+        } catch (requestError) {
+            dispatch(setCartError(requestError.message || "Unable to add to cart"))
+        }
+    }
 
     async function handleAddToWishlist(productId) {
-        setSavingId(productId);
-        setWishlistError("");
+        setSavingId(productId)
+        setWishlistError("")
 
         try {
-            await addToWishlist(productId);
-            setSavedIds((currentIds) => [...currentIds, productId]);
+            await addToWishlist(productId)
+            setSavedIds((currentIds) => [...currentIds, productId])
         } catch (requestError) {
-            setWishlistError(requestError.message || "Unable to save product.");
+            setWishlistError(requestError.message || "Unable to save product.")
         } finally {
-            setSavingId("");
+            setSavingId("")
         }
     }
 
@@ -76,6 +101,13 @@ function Products(){
                     <p className="product-price">₹{product.price.toLocaleString("en-IN")}</p>
                     <p className={product.stock>0?"stock":"stock out-of-stock"}>{product.stock>0?`${product.stock} units left`:"Out of stock"}</p>
                     <Link className="button" to={`/products/${product._id}`}>View details <span aria-hidden="true">→</span></Link>
+                    <button
+                        className="button"
+                        type="button"
+                        onClick={()=>handleAddToCart(product._id)}
+                    >
+                        Add to Cart
+                    </button>
                     <button
                         className="button wishlist-button"
                         type="button"
