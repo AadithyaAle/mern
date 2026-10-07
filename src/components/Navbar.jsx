@@ -26,6 +26,7 @@ function Navbar() {
                 <Link to="/products">Products</Link>
                 <Link to="/wishlist">Wishlist</Link>
                 <Link to="/cart">Cart ({cartCount})</Link>
+                <Link to="/orders">My Orders</Link>
                 <button type="button" onClick={handleLogout}>
                     Logout
                 </button>

@@ -8,6 +8,7 @@ module.exports = defineConfig({
       '/wishlist': 'http://localhost:5000',
       '/cart': 'http://localhost:5000',
       '/api': 'http://localhost:5000',
+      '/orders': 'http://localhost:5000',
     },
   },
 });

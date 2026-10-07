@@ -36,3 +36,21 @@ export function updateCartQuantity(productId,quantity){
 export function removeFromCart(productId){
   return request(`/cart/${productId}`,{method:"DELETE"})
 }
+export function createPaymentOrder(shippingAddress) {
+  return request("/orders/create-payment-order", {
+    method: "POST",
+    data: { shippingAddress },
+  });
+}
+export function verifyPayment(paymentData) {
+  return request("/orders/verify-payment", {
+    method: "POST",
+    data: paymentData,
+  });
+}
+export function getMyOrders() {
+  return request("/orders");
+}
+export function getOrder(id) {
+  return request(`/orders/${id}`);
+}

@@ -1,6 +1,6 @@
 import React,{useEffect} from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 import { setCartItems, setCartLoading, setCartError } from "../store/cartSlice";
 import { getCart, updateCartQuantity, removeFromCart } from "../services/api";
 import Navbar from "../components/Navbar";
@@ -10,6 +10,7 @@ function Cart(){
     const cartItems = useSelector((state) => state.cart.cartItems || []);
     const loading = useSelector((state) => state.cart.loading);
     const error = useSelector((state) => state.cart.error);
+    const navigate=useNavigate()
 
     async function refreshCart(){
         dispatch(setCartLoading(true));
@@ -147,7 +148,11 @@ function Cart(){
                     <h2>Order Summary</h2>
                     <p>Items: {cartItems.reduce((total, item) => total + item.quantity, 0)}</p>
                     <p>Subtotal: ₹{subtotal.toLocaleString("en-IN")}</p>
-                    <button className="button" type="button">
+                    <button
+                        className="button"
+                        type="button"
+                        onClick={() => navigate("/checkout")}
+                    >
                         Proceed to Checkout
                     </button>
                 </aside>
