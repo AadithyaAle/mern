@@ -1,5 +1,6 @@
 const Order = require("../models/order.model");
 const Product = require("../models/product.model");
+const Customer = require("../models/customer.model");
 const razorpay = require("../config/razorpay");
 const crypto=require("crypto")
 const mongoose=require("mongoose")
@@ -183,29 +184,88 @@ const verifyPayment = async (req, res) => {
                 message: "Invalid payment signature",
             });
         }
-        if (
-            order.paymentStatus !== "PAID" ||
-            order.razorpayPaymentId !== razorpay_payment_id
-        ) {
-            order.paymentStatus = "PAID";
-            order.status = "PLACED";
-            order.razorpayPaymentId = razorpay_payment_id;
-            await order.save();
-        }
+        const session = await mongoose.startSession();
+        let confirmedOrder;
 
-        req.user.cart = [];
-        await req.user.save();
+        try {
+            await session.withTransaction(async () => {
+                const currentOrder = await Order.findOne({
+                    _id: shopKartOrderId,
+                    user: req.user._id,
+                }).session(session);
+
+                if (!currentOrder) {
+                    const error = new Error("Order not found");
+                    error.statusCode = 404;
+                    throw error;
+                }
+
+                // Make repeated verification safe: do not deduct stock twice,
+                // or clear products the customer may have added since payment.
+                if (currentOrder.paymentStatus === "PAID") {
+                    if (currentOrder.razorpayPaymentId !== razorpay_payment_id) {
+                        const error = new Error("Order was paid with a different payment");
+                        error.statusCode = 409;
+                        throw error;
+                    }
+                    confirmedOrder = currentOrder;
+                    return;
+                }
+
+                if (currentOrder.paymentStatus !== "PENDING") {
+                    const error = new Error("Order is not awaiting payment");
+                    error.statusCode = 409;
+                    throw error;
+                }
+
+                // Conditional atomic updates prevent stock from going below zero.
+                for (const item of currentOrder.items) {
+                    const stockUpdate = await Product.updateOne(
+                        {
+                            _id: item.product,
+                            stock: { $gte: item.quantity },
+                        },
+                        { $inc: { stock: -item.quantity } },
+                        { session }
+                    );
+
+                    if (stockUpdate.modifiedCount !== 1) {
+                        const error = new Error(
+                            `Insufficient stock for ${item.name}`
+                        );
+                        error.statusCode = 409;
+                        throw error;
+                    }
+                }
+
+                currentOrder.paymentStatus = "PAID";
+                currentOrder.status = "PLACED";
+                currentOrder.razorpayPaymentId = razorpay_payment_id;
+                await currentOrder.save({ session });
+
+                // Commit the order, inventory changes, and cart clear together.
+                await Customer.updateOne(
+                    { _id: req.user._id },
+                    { $set: { cart: [] } },
+                    { session }
+                );
+
+                confirmedOrder = currentOrder;
+            });
+        } finally {
+            await session.endSession();
+        }
 
         return res.status(200).json({
             success: true,
             message: "Payment verified and order placed",
-            order,
+            order: confirmedOrder,
         });
     } catch (error) {
         console.error(error);
-        return res.status(500).json({
+        return res.status(error.statusCode || 500).json({
             success: false,
-            message: "Unable to verify payment",
+            message: error.message || "Unable to verify payment",
         });
     }
 };

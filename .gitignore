@@ -33,3 +33,5 @@ Thumbs.db
 
 # Postman local workspace metadata
 .postman/
+.yaml
+postman
