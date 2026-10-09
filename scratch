@@ -1,3 +1,0 @@
-const getProductById=async ((req,res)=>{
-    
-})

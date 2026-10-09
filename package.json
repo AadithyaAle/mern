@@ -2,11 +2,12 @@
   "name": "mern",
   "version": "1.0.0",
   "description": "ShopKart customer authentication lab",
-  "main": "index.html",
+  "main": "backend/index.js",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "dev:frontend": "vite --host 127.0.0.1",
     "build": "vite build",
+    "start": "node backend/index.js",
     "test": "echo \"No automated tests yet\""
   },
   "keywords": [],
