@@ -1,6 +1,12 @@
 const bcrypt=require("bcrypt")
 const Customer=require("../models/customer.model")
 const generateToken=require("../utils/generateToken")
+const isProduction=process.env.NODE_ENV==="production"
+const authCookieOptions={
+    httpOnly:true,
+    secure:isProduction,
+    sameSite:isProduction?"none":"lax",
+}
 const registerCustomer=async(req,res)=>{
     try{
         const{fullName,email,password,phone}=req.body
@@ -53,7 +59,8 @@ const loginCustomer=async(req,res)=>{
         const token=generateToken(customer._id.toString())
 
         res.cookie("token",token,{
-            httpOnly:true,secure:false,sameSite:"lax",maxAge:7*24*60*60*1000,
+            ...authCookieOptions,
+            maxAge:7*24*60*60*1000,
         })
         return res.status(200).json({
             success:true,message:"Login successful",
@@ -75,9 +82,7 @@ const getMyProfile=(req,res)=>{
 }
 
 const logoutCustomer=(req,res)=>{
-    res.clearCookie("token",{
-        httpOnly:true,secure:false,sameSite:"lax",
-    })
+    res.clearCookie("token",authCookieOptions)
     return res.status(200).json({
         success:true,message:"Logged out successfully",
     })
