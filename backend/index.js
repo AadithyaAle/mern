@@ -40,7 +40,9 @@ app.get("/",(req,res)=>{
     })
 })
 
-mongoose.connect(process.env.MONGO_URI).then(()=>{
+mongoose.connect(process.env.MONGO_URI, {
+    dbName: process.env.MONGO_DB_NAME || "shopkart",
+}).then(()=>{
     console.log("MongoDB connected")
 
     app.listen(PORT,()=>{
